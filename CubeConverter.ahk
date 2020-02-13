@@ -54,7 +54,7 @@ Loop,% #ctrls
 		GUI, Add, Text, xm, Hotkey for Inventoryclear:
 	
 	If (A_Index == 4)
-		GUI, Add, Text, xm, Hotkey for DropItems:
+		GUI, Add, Text, xm, Hotkey for Reforge:
 	
 	IniRead, savedHK%A_Index%, Hotkeys.ini, Hotkeys, %A_Index%, %A_Space%	;Check for saved hotkeys in INI file.
 	
@@ -116,12 +116,12 @@ Label3:		;Hotkey for Inventoryclear
 	}
 Return
 
-Label4:		;Hotkey for DropItems
+Label4:		;Hotkey for Reforge
 	IfWinNotActive, CubeConverter Hotkeys
 	{
 		If (ItemSize == "")
 			global ItemSize := 1
-		KanaisCube("DropItems")
+		KanaisCube("Reforge")
 	}
 Return
 
@@ -171,14 +171,24 @@ KanaisCube(Setting)
 	If (Setting == "Blacksmith")
 		MouseClick, left, Salvage[1], Salvage[2]
 	
-	If (Setting == "DropItems")
+	If (Setting == "Reforge")
 	{
-		XDrop := TopLeftInv[1]-SlotX
-		YDrop := TopLeftInv[2]
-		send {i}
-		MouseGetPos x, y
+		XClick := TopLeftInv[1]
+		YClick := TopLeftInv[2]
+		MouseClick, right, XClick, YClick
+		Sleep % Globalsleep
+		MouseClick, left, Fill[1], Fill[2]
+		Sleep % Globalsleep
+		MouseClick, left, Transmute[1], Transmute[2]
+		Sleep % Globalsleep + 125
+		MouseClick, left, SwitchPagesRight[1], SwitchPagesRight[2]
+		Sleep % Globalsleep
+		MouseClick, left, SwitchPagesLeft[1], SwitchPagesLeft[2]
+		Sleep % Globalsleep
+		MouseMove, XClick, YClick
 	}
-	
+
+	If (Setting != "Reforge"){
 	Loop
 	{
 		++Cycles
@@ -193,14 +203,6 @@ KanaisCube(Setting)
 			global AdjustedSleep := Max(Globalsleep - 35, 3)
 			Sleep % AdjustedSleep
 			MouseClick, left, XClick, YClick
-		}
-		
-		If (Setting == "DropItems") && (ColumnCount != 0)
-		{
-			MouseMove %XClick%, %YClick%
-			send {Lbutton down}
-			MouseMove %XDrop%, %YDrop%
-			send {Lbutton up}
 		}
 		
 		If (ItemSize == 2)
@@ -241,11 +243,6 @@ KanaisCube(Setting)
 			Send, {Enter}
 		}
 	}	Until Cycles>=Columns*Rows/ItemSize
-	
-	If (Setting == "DropItems")
-	{
-		MouseMove %x%, %y%
-		send {i}
 	}
 }
 
